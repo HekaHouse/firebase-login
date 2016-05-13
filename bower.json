@@ -4,7 +4,9 @@
   "dependencies": {
     "polymer": "Polymer/polymer#^1.2.0",
     "firebase-element": "GoogleWebComponents/firebase-element#^1.0.12",
-    "social-media-icons": "~1.0.3"
+    "social-media-icons": "~1.0.3",
+    "paper-dialog": "PolymerElements/paper-dialog#^1.0.4",
+    "paper-card": "PolymerElements/paper-card#^1.1.1"
   },
   "ignore": []
 }
