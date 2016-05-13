@@ -1,0 +1,10 @@
+{
+  "name": "polymer-starter-kit",
+  "private": true,
+  "dependencies": {
+    "polymer": "Polymer/polymer#^1.2.0",
+    "firebase-element": "GoogleWebComponents/firebase-element#^1.0.12",
+    "social-media-icons": "~1.0.3"
+  },
+  "ignore": []
+}
