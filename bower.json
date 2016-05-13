@@ -1,5 +1,5 @@
 {
-  "name": "polymer-starter-kit",
+  "name": "firebase-login",
   "private": true,
   "dependencies": {
     "polymer": "Polymer/polymer#^1.2.0",
