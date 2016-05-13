@@ -1,0 +1,398 @@
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../paper-dialog/paper-dialog.html">
+<link rel="import" href="../paper-card/paper-card.html">
+<link rel="import" href="../paper-button/paper-button.html">
+<link rel="import" href="../paper-fab/paper-fab.html">
+<link rel="import" href="../firebase-element/firebase-auth.html">
+<link rel="import" href="../social-media-icons/social-media-icons.html">
+
+
+<!--
+`<firebase-login>` is a firebase login prompt presented in a paper-dialog
+
+    <firebase-login firebase-root="https://YOUR-FIREBASE.firebaseio.com"></firebase-login>
+
+After authentication a paper-fab logout button is displayed in lower right corner
+
+Authentication triggers an iron-signal to fire named <i>logged-in</i> with the users uid as the data property
+
+Depends on <a href="https://github.com/hejty/social-media-icons">social-media-icons</a>
+
+@group HekaHouse
+@element firebase-login
+@demo demo/index.html
+-->
+
+
+<dom-module id="firebase-login">
+  <template>
+  <style>
+    :host {
+      display: block;
+    }
+    paper-fab {
+      z-index: 23;
+    }
+    paper-dialog {
+      width: auto;
+      min-width: 300px;
+    }
+    paper-card {
+      margin: 0px;
+      width: 100%;
+    }
+    paper-button {
+      background: var(--accent-color);
+      color: var(--text-primary-color);
+      text-transform: uppercase;
+      border: none;
+      letter-spacing: 0.1em;
+      font-weight: bold;
+      -moz-border-radius: 0.4em;
+      -webkit-border-radius: 0.4em;
+      border-radius: 0.4em;
+      -moz-transition: all 0.15s ease-in-out;
+      -o-transition: all 0.15s ease-in-out;
+      -webkit-transition: all 0.15s ease-in-out;
+      transition: all 0.15s ease-in-out;
+    }
+    paper-button:hover {
+      background: var(--accent-color);
+    }
+    paper-input {
+        /* Label and underline color when the input is not focused */
+        --paper-input-container-color: var(--dark-primary-color);
+        /* Label and underline color when the input is focused */
+        --paper-input-container-focus-color: var(--accent-color);
+        /* Input foreground color */
+        --paper-input-container-input-color: var(--secondary-text-color);
+    }
+
+    paper-button.facebook {
+      background: #3a589a;
+      -moz-transition: all 0.15s ease-in-out;
+      -o-transition: all 0.15s ease-in-out;
+      -webkit-transition: all 0.15s ease-in-out;
+      transition: all 0.15s ease-in-out;
+    }
+    paper-button.facebook:hover {
+      background: rgba(58, 88, 154, 0.8);
+    }
+    paper-button.twitter {
+      background: #4099ff;
+      -moz-transition: all 0.15s ease-in-out;
+      -o-transition: all 0.15s ease-in-out;
+      -webkit-transition: all 0.15s ease-in-out;
+      transition: all 0.15s ease-in-out;
+    }
+    paper-button.twitter:hover {
+      background: rgba(64, 153, 255, 0.8);
+    }
+    paper-button.google {
+      background: #e9544f;
+      -moz-transition: all 0.15s ease-in-out;
+      -o-transition: all 0.15s ease-in-out;
+      -webkit-transition: all 0.15s ease-in-out;
+      transition: all 0.15s ease-in-out;
+    }
+    paper-button.google:hover {
+      background: rgba(233, 84, 79, 0.8);
+    }
+    paper-fab {
+      position: fixed;
+      bottom: 18px;
+      right: 18px;
+    }
+    .card-content {
+      margin: 8px;
+      display: flex;
+      flex-flow: column nowrap;
+      justify-content: flex-start;
+      align-content: space-around;
+      width: auto;
+      color: var(--secondary-text-color);
+    }
+    .card-actions {
+      margin: 8px;
+      display: flex;
+      flex-flow: row wrap;
+      justify-content: center;
+      align-items: center;
+      width:auto;
+      color: var(--secondary-text-color);
+    }
+    .card-actions paper-button {
+      margin: 8px;
+    }
+  </style>
+    <firebase-auth
+      id="firebaseLogin"
+      user="{{user}}"
+      status-known="{{statusKnown}}"
+      location="https://soundstr.firebaseio.com"
+      provider="{{provider}}"
+      on-error="errorHandler"
+      on-login="userSuccessHandler"></firebase-auth>
+    <paper-dialog id="loginDialog" no-cancel-on-esc-key no-cancel-on-outside-click opened>
+      <paper-card>
+        <div class="card-content">
+          <h2>Choose a Login</h2>
+          connect with:
+        </div>
+        <div class="card-actions">
+          <paper-button href="" class="facebook" on-tap="loginFacebook" hidden="{{hideFacebook}}">
+            <social-media-icons icon="facebook" color="#fff" size="32"></social-media-icons>
+          </paper-button>
+          <paper-button href="" class="twitter" on-tap="loginTwitter" hidden="{{hideTwitter}}">
+            <social-media-icons icon="twitter" color="#fff" size="32"></social-media-icons>
+          </paper-button>
+          <paper-button href="" class="google" on-tap="loginGoogle" hidden="{{hideGoogle}}">
+            <social-media-icons icon="googleplus" color="#fff" size="32"></social-media-icons>
+          </paper-button>
+        </div>
+      </paper-card>
+    </paper-dialog>
+    <paper-fab id="logout-button" on-tap="logout" hidden$="{{computeLogoutHidden(statusKnown, user)}}" mini icon="exit-to-app"></paper-fab>
+  </template>
+</dom-module>
+<script>
+  // Create a callback which logs the current auth state
+  function authDataCallback(authData) {
+    if (authData) {
+      console.log("User " + authData.uid + " is logged in with " + authData.provider);
+    } else {
+      console.log("User is logged out");
+
+    }
+  }
+
+
+  Polymer({
+    is: 'firebase-login',
+
+    properties: {
+      provider: {
+        type: String,
+        value: 'anonymous'
+      },
+
+      message: {
+        type: String,
+        value: ''
+      },
+
+      email: {
+        type: String,
+        value: ''
+      },
+
+      password: {
+        type: String,
+        value: ''
+      },
+
+      user: {
+        type: Object,
+        value: null,
+        notify: true
+      },
+
+      statusKnown: {
+        type: Boolean
+      },
+
+      firebaseRoot: {
+        type: String,
+        notify: true
+      },
+
+      logged: {
+        type: Boolean,
+        value: false
+      },
+
+      hideTwitter: {
+        type: Boolean,
+        value: false,
+        notify: true
+      },
+
+      hideFacebook: {
+        type: Boolean,
+        value: false,
+        notify: true
+      },
+
+      hideGoogle: {
+        type: Boolean,
+        value: false,
+        notify: true
+      },
+
+      hideGithub: {
+        type: Boolean,
+        value: false,
+        notify: true
+      }
+    },
+    ready: function() {
+      // Register the callback to be fired every time auth state changes
+      var ref = new Firebase(this.firebaseRoot);
+      ref.onAuth(authDataCallback);
+      if (this.user) {
+        if (this.$.loginDialog.opened) {
+          this.$.loginDialog.close();
+        }
+        return 'Logged in';
+      } else {
+        if (!this.$.loginDialog.opened) {
+          this.$.loginDialog.open();
+        }
+        return 'Logged out';
+      }
+    },
+
+    login: function() {
+      var params;
+      this.provider = 'password';
+      try {
+        params = JSON.parse(this.params);
+      } catch (e) {
+        params = null;
+      }
+
+      params = params || {};
+      params.email = this.email;
+      params.password = this.password;
+
+
+      this.$.firebaseLogin.login(params);
+
+    },
+
+    loginPassword: function() {
+      var params;
+
+      try {
+        params = JSON.parse(this.params);
+      } catch (e) {
+        params = null;
+      }
+      this.provider = 'password';
+
+      params = params || {};
+      params.email = this.email;
+      params.password = this.password;
+
+
+      this.$.firebaseLogin.login(params);
+    },
+
+    loginFacebook: function(provided) {
+      var params = {scope: "email,user_location,publish_actions"};
+      this.provider = 'facebook';
+      this.loginSocial(params);
+    },
+
+    loginTwitter: function(provided) {
+      var params=null;
+      this.provider = 'twitter';
+      this.loginSocial(params);
+    },
+
+
+    loginGoogle: function(provided) {
+      var params=null;
+      this.provider = 'google';
+      this.loginSocial(params);
+    },
+
+    loginSocial: function(params) {
+      this.$.firebaseLogin.login(params);
+    },
+
+    logout: function() {
+      this.$.firebaseLogin.logout();
+      this.$.loginDialog.hidden = false;
+      this.fire('logged-out');
+
+    },
+
+    errorHandler: function(e) {
+      this.message = 'Error: ' + e.detail.message;
+    },
+
+    userSuccessHandler: function(e) {
+      this.message = e.type + ' success!';
+      if (e.detail.user) {
+        this.fire('iron-signal', {name: 'logged-in', data: e.detail.user.uid});
+        this.$.loginDialog.hidden = true;
+      }
+    },
+
+
+    createUserHandler: function(e) {
+      this.$.firebaseLogin.createUser(this.email, this.password);
+    },
+
+    changePasswordHandler: function(e) {
+      this.$.firebaseLogin.changePassword(this.email, this.password, this.newPassword);
+    },
+
+    resetPasswordHandler: function(e) {
+      this.$.firebaseLogin.sendPasswordResetEmail(this.email);
+    },
+
+    removeUserHandler: function(e) {
+      this.$.firebaseLogin.removeUser(this.email, this.password);
+    },
+
+    computePasswordHidden: function(provider) {
+      return provider !== 'password';
+    },
+
+    computeCreateUserDisabled: function(email, password) {
+      return !email || !password;
+    },
+
+    computeChangePasswordDisabled: function(email, password, newPassword) {
+      return !email || !password || !newPassword;
+    },
+
+    computeResetPasswordDisabled: function(email, password) {
+      return !email || !password;
+    },
+
+    computeRemoveUserDisabled: function(email, password) {
+      return !email || !password;
+    },
+
+    computeLoginHidden: function(statusKnown, user) {
+      return !statusKnown || !!user;
+    },
+
+    computeLogoutHidden: function(statusKnown, user) {
+      return !statusKnown || !user;
+    },
+
+    computeLoginStatus: function(statusKnown, user) {
+      if (statusKnown && user) {
+        if (this.$.loginDialog.opened) {
+          this.$.loginDialog.hidden = true;
+        }
+        userAccount = user;
+        return 'Logged in';
+      }
+
+      if (statusKnown) {
+        if (this.$.loginDialog.opened) {
+          this.$.loginDialog.open();
+          this.$.loginDialog.hidden = false;
+        }
+        return 'Logged out';
+      }
+
+      return 'Unknown (checking status...)';
+    }
+  });
+</script>
