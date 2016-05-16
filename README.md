@@ -12,7 +12,8 @@
 
 ## Example
 
-    <firebase-login firebase-root="https://YOUR-FIREBASE.firebaseio.com"></firebase-login>
+    <firebase-login
+    firebase-root="https://YOUR-FIREBASE.firebaseio.com"></firebase-login>
 
 ## Note
 
