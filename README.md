@@ -1,14 +1,38 @@
 # firebase-login
+
 `<firebase-login>` is a firebase login prompt presented in a paper-dialog
+
+[API Docs and Demo](https://heka-house-firebase-login-demo.firebaseapp.com/)
+
+[Source](http://github.com/hekahouse/firebase-login/)
+
+## Install
+
+    bower install --save HekaHouse/firebase-login
+
+## Example
 
     <firebase-login firebase-root="https://YOUR-FIREBASE.firebaseio.com"></firebase-login>
 
-After authentication a <a href="https://elements.polymer-project.org/elements/paper-fab">paper-fab</a> logout button is displayed in lower right corner
+## Note
 
-Authentication triggers an <a href="https://elements.polymer-project.org/elements/iron-signals">iron-signal</a> to fire named <i>logged-in</i> with the users uid as the data property
+After authentication a paper-fab logout button is displayed in lower right corner
 
-Depends on <a href="https://github.com/hejty/social-media-icons">social-media-icons</a>
+Authentication triggers an iron-signal to fire named <i>logged-in</i> with the users uid as the data property
 
-Currently supports logging in with Google, Facebook, and Twitter.
+Currently supports Google and Facebook logins
 
-To learn how to configure Firebase authentication visit <a href="https://www.firebase.com/docs/web/guide/user-auth.html">the docs</a>.
+## Dependencies
+
+Element dependencies are managed via [Bower](http://bower.io/). You can
+install that via:
+
+    npm install -g bower
+
+Then, go ahead and download the element's dependencies:
+
+    bower install
+
+firebase-login depends on
+
+[social-media-icons](https://github.com/hejty/social-media-icons)

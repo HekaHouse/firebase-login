@@ -6,23 +6,51 @@
 <link rel="import" href="../firebase-element/firebase-auth.html">
 <link rel="import" href="../social-media-icons/social-media-icons.html">
 
-
 <!--
+# firebase-login
+
 `<firebase-login>` is a firebase login prompt presented in a paper-dialog
 
+[API Docs and Demo](https://heka-house-firebase-login-demo.firebaseapp.com/)
+
+[Source](http://github.com/hekahouse/firebase-login/)
+
+## Install
+
+    bower install --save HekaHouse/firebase-login
+
+## Example
+
     <firebase-login firebase-root="https://YOUR-FIREBASE.firebaseio.com"></firebase-login>
+
+## Note
 
 After authentication a paper-fab logout button is displayed in lower right corner
 
 Authentication triggers an iron-signal to fire named <i>logged-in</i> with the users uid as the data property
 
-Depends on <a href="https://github.com/hejty/social-media-icons">social-media-icons</a>
+Currently supports Google and Facebook logins
+
+## Dependencies
+
+Element dependencies are managed via [Bower](http://bower.io/). You can
+install that via:
+
+    npm install -g bower
+
+Then, go ahead and download the element's dependencies:
+
+    bower install
+
+firebase-login depends on
+
+[social-media-icons](https://github.com/hejty/social-media-icons)
 
 @group HekaHouse
 @element firebase-login
 @demo demo/index.html
+@hero hero.svg
 -->
-
 
 <dom-module id="firebase-login">
   <template>
@@ -129,11 +157,11 @@ Depends on <a href="https://github.com/hejty/social-media-icons">social-media-ic
       id="firebaseLogin"
       user="{{user}}"
       status-known="{{statusKnown}}"
-      location="https://soundstr.firebaseio.com"
+      location="{{firebaseRoot}}"
       provider="{{provider}}"
       on-error="errorHandler"
       on-login="userSuccessHandler"></firebase-auth>
-    <paper-dialog id="loginDialog" no-cancel-on-esc-key no-cancel-on-outside-click opened>
+    <paper-dialog id="loginDialog" no-cancel-on-esc-key no-cancel-on-outside-click hidden$="{{computeLoginHidden(statusKnown, user)}}">
       <paper-card>
         <div class="card-content">
           <h2>Choose a Login</h2>
@@ -156,243 +184,161 @@ Depends on <a href="https://github.com/hejty/social-media-icons">social-media-ic
   </template>
 </dom-module>
 <script>
-  // Create a callback which logs the current auth state
-  function authDataCallback(authData) {
-    if (authData) {
-      console.log("User " + authData.uid + " is logged in with " + authData.provider);
-    } else {
-      console.log("User is logged out");
-
-    }
-  }
-
 
   Polymer({
     is: 'firebase-login',
 
     properties: {
+      //firebase-auth provider
       provider: {
         type: String,
         value: 'anonymous'
       },
-
+      //login status message
       message: {
         type: String,
-        value: ''
+        value: 'not authenticated',
+        notify: true
       },
-
-      email: {
-        type: String,
-        value: ''
-      },
-
-      password: {
-        type: String,
-        value: ''
-      },
-
+      //firebase-auth user
       user: {
         type: Object,
         value: null,
         notify: true
       },
-
+      //firebase-auth status
       statusKnown: {
         type: Boolean
       },
-
+      // Firebase to log into
       firebaseRoot: {
         type: String,
         notify: true
       },
 
-      logged: {
-        type: Boolean,
-        value: false
-      },
-
+      // option to offer Twitter authentication
       hideTwitter: {
         type: Boolean,
         value: false,
         notify: true
       },
-
+      // option to offer Facebook authentication
       hideFacebook: {
         type: Boolean,
         value: false,
         notify: true
       },
-
+      // option to offer Google authentication
       hideGoogle: {
         type: Boolean,
         value: false,
         notify: true
       },
-
+      // option to offer GitHub authentication
       hideGithub: {
         type: Boolean,
         value: false,
         notify: true
       }
     },
-    ready: function() {
-      // Register the callback to be fired every time auth state changes
+    // Register the authDataCallback to be fired every time auth state changes
+    attached: function() {
       var ref = new Firebase(this.firebaseRoot);
-      ref.onAuth(authDataCallback);
-      if (this.user) {
-        if (this.$.loginDialog.opened) {
-          this.$.loginDialog.close();
-        }
-        return 'Logged in';
-      } else {
-        if (!this.$.loginDialog.opened) {
-          this.$.loginDialog.open();
-        }
-        return 'Logged out';
-      }
+      ref.onAuth(this._authDataCallback.bind(this));
     },
-
-    login: function() {
-      var params;
-      this.provider = 'password';
-      try {
-        params = JSON.parse(this.params);
-      } catch (e) {
-        params = null;
-      }
-
-      params = params || {};
-      params.email = this.email;
-      params.password = this.password;
-
-
-      this.$.firebaseLogin.login(params);
-
-    },
-
-    loginPassword: function() {
-      var params;
-
-      try {
-        params = JSON.parse(this.params);
-      } catch (e) {
-        params = null;
-      }
-      this.provider = 'password';
-
-      params = params || {};
-      params.email = this.email;
-      params.password = this.password;
-
-
-      this.$.firebaseLogin.login(params);
-    },
-
-    loginFacebook: function(provided) {
-      var params = {scope: "email,user_location,publish_actions"};
-      this.provider = 'facebook';
-      this.loginSocial(params);
-    },
-
-    loginTwitter: function(provided) {
-      var params=null;
-      this.provider = 'twitter';
-      this.loginSocial(params);
-    },
-
-
-    loginGoogle: function(provided) {
-      var params=null;
-      this.provider = 'google';
-      this.loginSocial(params);
-    },
-
-    loginSocial: function(params) {
-      this.$.firebaseLogin.login(params);
-    },
-
+    // log user out
     logout: function() {
       this.$.firebaseLogin.logout();
       this.$.loginDialog.hidden = false;
-      this.fire('logged-out');
+      this._fireLogout();
+    },
+    // fire logout via iron-signals {name: 'logged-out', data: this.firebaseRoot}
+    _fireLogout: function() {
+      this.fire('iron-signal', {name: 'logged-out', data: this.firebaseRoot});
+      this.message = ' logged out!';
+    },
+    // Handle authorization changes from Firebase
+    _authDataCallback: function(authData) {
+      if (this.$) {
+        if (authData) {
+          if (this.$.loginDialog.opened) {
+            this.$.loginDialog.close();
+            this._fireLogin(authData);
+          }
+        } else {
+          if (!this.$.loginDialog.opened) {
+            this.$.loginDialog.open();
+            this._fireLogout();
+          }
+        }
+      }
+    },
+    // General login function called by all other login methods
+    _login: function() {
+      var params;
 
+      try {
+        params = JSON.parse(this.params);
+      } catch (e) {
+        params = null;
+      }
+
+      params = params || {};
+
+      this.$.firebaseLogin.login(params);
     },
 
-    errorHandler: function(e) {
+    // set login parameters for Facebook
+    _loginFacebook: function(provided) {
+      var params = {scope: "email,user_location,publish_actions"};
+      this.provider = 'facebook';
+      this._loginSocial(params);
+    },
+
+    // set login parameters for Twitter
+    _loginTwitter: function(provided) {
+      var params=null;
+      this.provider = 'twitter';
+      this._loginSocial(params);
+    },
+
+    // set login parameters for Google
+    _loginGoogle: function(provided) {
+      var params=null;
+      this.provider = 'google';
+      this._loginSocial(params);
+    },
+
+    // process a social login
+    _loginSocial: function(params) {
+      this.$.firebaseLogin.login(params);
+    },
+    // fire login via iron-signals {name: 'logged-in', data: user.uid}
+    _fireLogin: function(user) {
+      this.fire('iron-signal', {name: 'logged-in', data: user.uid});
+      this.message = ' login success!';
+    },
+    // set message to error
+    _errorHandler: function(e) {
       this.message = 'Error: ' + e.detail.message;
     },
-
-    userSuccessHandler: function(e) {
-      this.message = e.type + ' success!';
+    // set message to success announce login
+    _userSuccessHandler: function(e) {
       if (e.detail.user) {
-        this.fire('iron-signal', {name: 'logged-in', data: e.detail.user.uid});
         this.$.loginDialog.hidden = true;
+        this._fireLogin(e.detail.user);
       }
     },
 
-
-    createUserHandler: function(e) {
-      this.$.firebaseLogin.createUser(this.email, this.password);
+    // do we need to show the login?
+    _computeLoginHidden: function(statusKnown,user) {
+      return statusKnown && user;
     },
 
-    changePasswordHandler: function(e) {
-      this.$.firebaseLogin.changePassword(this.email, this.password, this.newPassword);
-    },
-
-    resetPasswordHandler: function(e) {
-      this.$.firebaseLogin.sendPasswordResetEmail(this.email);
-    },
-
-    removeUserHandler: function(e) {
-      this.$.firebaseLogin.removeUser(this.email, this.password);
-    },
-
-    computePasswordHidden: function(provider) {
-      return provider !== 'password';
-    },
-
-    computeCreateUserDisabled: function(email, password) {
-      return !email || !password;
-    },
-
-    computeChangePasswordDisabled: function(email, password, newPassword) {
-      return !email || !password || !newPassword;
-    },
-
-    computeResetPasswordDisabled: function(email, password) {
-      return !email || !password;
-    },
-
-    computeRemoveUserDisabled: function(email, password) {
-      return !email || !password;
-    },
-
-    computeLoginHidden: function(statusKnown, user) {
-      return !statusKnown || !!user;
-    },
-
-    computeLogoutHidden: function(statusKnown, user) {
+    // do we need to show the logout?
+    _computeLogoutHidden: function(statusKnown, user) {
       return !statusKnown || !user;
-    },
-
-    computeLoginStatus: function(statusKnown, user) {
-      if (statusKnown && user) {
-        if (this.$.loginDialog.opened) {
-          this.$.loginDialog.hidden = true;
-        }
-        userAccount = user;
-        return 'Logged in';
-      }
-
-      if (statusKnown) {
-        if (this.$.loginDialog.opened) {
-          this.$.loginDialog.open();
-          this.$.loginDialog.hidden = false;
-        }
-        return 'Logged out';
-      }
-
-      return 'Unknown (checking status...)';
     }
+
   });
 </script>

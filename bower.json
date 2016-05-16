@@ -1,6 +1,25 @@
 {
   "name": "firebase-login",
-  "private": true,
+  "version": "1.0.1",
+  "authors": [
+    "Aron Price <aron@heka.house>"
+  ],
+  "description": "forces Firebase authentication with modal paper-dialog.",
+  "keywords": [
+    "web-component",
+    "polymer",
+    "firebase",
+    "authentication",
+    "login",
+    "paper-dialog"
+  ],
+  "main": "firebase-login.html",
+  "license": "http://polymer.github.io/LICENSE.txt",
+  "homepage": "https://github.com/HekaHouse/firebase-login/",
+  "ignore": [
+    "/.*",
+    "/test/"
+  ],
   "dependencies": {
     "polymer": "Polymer/polymer#^1.2.0",
     "firebase-element": "GoogleWebComponents/firebase-element#^1.0.12",
@@ -8,5 +27,8 @@
     "paper-dialog": "PolymerElements/paper-dialog#^1.0.4",
     "paper-card": "PolymerElements/paper-card#^1.1.1"
   },
-  "ignore": []
+  "devDependencies": {
+    "iron-component-page": "PolymerElements/iron-component-page#^1.0.0",
+    "web-component-tester": "^4.0.0"
+  }
 }
