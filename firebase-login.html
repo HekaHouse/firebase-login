@@ -161,27 +161,27 @@ firebase-login depends on
       location="{{firebaseRoot}}"
       provider="{{provider}}"
       on-error="errorHandler"
-      on-login="userSuccessHandler"></firebase-auth>
-    <paper-dialog id="loginDialog" no-cancel-on-esc-key no-cancel-on-outside-click hidden$="{{computeLoginHidden(statusKnown, user)}}">
+      on-login="_userSuccessHandler"></firebase-auth>
+    <paper-dialog id="loginDialog" no-cancel-on-esc-key no-cancel-on-outside-click hidden$="{{_computeLoginHidden(statusKnown, user)}}">
       <paper-card>
         <div class="card-content">
           <h2>Choose a Login</h2>
           connect with:
         </div>
         <div class="card-actions">
-          <paper-button href="" class="facebook" on-tap="loginFacebook" hidden="{{hideFacebook}}">
+          <paper-button href="" class="facebook" on-tap="_loginFacebook" hidden="{{hideFacebook}}">
             <social-media-icons icon="facebook" color="#fff" size="32"></social-media-icons>
           </paper-button>
-          <paper-button href="" class="twitter" on-tap="loginTwitter" hidden="{{hideTwitter}}">
+          <paper-button href="" class="twitter" on-tap="_loginTwitter" hidden="{{hideTwitter}}">
             <social-media-icons icon="twitter" color="#fff" size="32"></social-media-icons>
           </paper-button>
-          <paper-button href="" class="google" on-tap="loginGoogle" hidden="{{hideGoogle}}">
+          <paper-button href="" class="google" on-tap="_loginGoogle" hidden="{{hideGoogle}}">
             <social-media-icons icon="googleplus" color="#fff" size="32"></social-media-icons>
           </paper-button>
         </div>
       </paper-card>
     </paper-dialog>
-    <paper-fab id="logout-button" on-tap="logout" hidden$="{{computeLogoutHidden(statusKnown, user)}}" mini icon="exit-to-app"></paper-fab>
+    <paper-fab id="logout-button" on-tap="logout" hidden$="{{_computeLogoutHidden(statusKnown, user)}}" mini icon="exit-to-app"></paper-fab>
   </template>
 </dom-module>
 <script>
