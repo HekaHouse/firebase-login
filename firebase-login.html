@@ -348,12 +348,12 @@ firebase-login depends on
 
     // do we need to show the login?
     _computeLoginHidden: function(statusKnown,user) {
-      return (statusKnown && user) || this.anonymous;
+      return (statusKnown && user) || this.isAnonymous;
     },
 
     // do we need to show the logout?
     _computeLogoutHidden: function(statusKnown, user) {
-      return !statusKnown || !user || anonymous;
+      return !statusKnown || !user || this.isAnonymous;
     }
 
   });
