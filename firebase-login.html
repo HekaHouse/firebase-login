@@ -240,12 +240,20 @@ firebase-login depends on
         type: Boolean,
         value: false,
         notify: true
+      },
+      anonymous: {
+        type: Boolean,
+        value: false,
+        notify: true
       }
     },
     // Register the authDataCallback to be fired every time auth state changes
     attached: function() {
       var ref = new Firebase(this.firebaseRoot);
       ref.onAuth(this._authDataCallback.bind(this));
+      if (this.anonymous) {
+        this._loginAnon();
+      }
     },
     // log user out
     logout: function() {
@@ -314,6 +322,13 @@ firebase-login depends on
     _loginSocial: function(params) {
       this.$.firebaseLogin.login(params);
     },
+
+    // process an anonymous login
+    _loginAnon: function() {
+      var params=null;
+      this.provider = 'anonymous';
+      this.$.firebaseLogin.login(params);
+    },
     // fire login via iron-signals {name: 'logged-in', data: user.uid}
     _fireLogin: function(user) {
       this.fire('iron-signal', {name: 'logged-in', data: user.uid});
@@ -333,12 +348,12 @@ firebase-login depends on
 
     // do we need to show the login?
     _computeLoginHidden: function(statusKnown,user) {
-      return statusKnown && user;
+      return (statusKnown && user) || this.anonymous;
     },
 
     // do we need to show the logout?
     _computeLogoutHidden: function(statusKnown, user) {
-      return !statusKnown || !user;
+      return !statusKnown || !user || anonymous;
     }
 
   });
