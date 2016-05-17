@@ -241,7 +241,7 @@ firebase-login depends on
         value: false,
         notify: true
       },
-      anonymous: {
+      isAnonymous: {
         type: Boolean,
         value: false,
         notify: true
@@ -251,7 +251,7 @@ firebase-login depends on
     attached: function() {
       var ref = new Firebase(this.firebaseRoot);
       ref.onAuth(this._authDataCallback.bind(this));
-      if (this.anonymous) {
+      if (this.isAnonymous) {
         this._loginAnon();
       }
     },
