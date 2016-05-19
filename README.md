@@ -2,7 +2,7 @@
 
 `<firebase-login>` is a firebase login prompt presented in a paper-dialog
 
-[API Docs and Demo](https://heka-house-firebase-login-demo.firebaseapp.com/)
+[API Docs and Demo](https://heka-house-polymer-demos.firebaseapp.com/firebase-login)
 
 [Source](http://github.com/hekahouse/firebase-login/)
 
